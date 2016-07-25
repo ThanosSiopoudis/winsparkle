@@ -114,7 +114,13 @@ bool GetHttpHeader(HINTERNET handle, DWORD whatToGet, DWORD& output)
 std::wstring GetURLFileName(const char *url)
 {
     const char *lastSlash = strrchr(url, '/');
-    const std::string fn(lastSlash ? lastSlash + 1 : url);
+    std::string fn(lastSlash ? lastSlash + 1 : url);
+    
+    std::size_t result = fn.find_last_of('.');
+    std::string extension = fn.substr(result + 1);
+    if (std::string::npos != result && extension == "zip")
+        fn.replace(result, (result + 1), ".exe");
+    
     return AnsiToWide(fn);
 }
 
