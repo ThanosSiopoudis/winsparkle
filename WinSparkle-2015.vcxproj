@@ -91,6 +91,7 @@
       <AdditionalIncludeDirectories>3rdparty\expat\expat\lib;3rdparty\wxWidgets_setup_h;3rdparty\wxWidgets\include;include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <ResourceCompile>
       <AdditionalIncludeDirectories>3rdparty\expat\expat\lib;3rdparty\wxWidgets_setup_h;3rdparty\wxWidgets\include;include</AdditionalIncludeDirectories>
@@ -101,6 +102,9 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>comctl32.lib;kernel32.lib;user32.lib;rpcrt4.lib;version.lib;wininet.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

@@ -91,11 +91,15 @@
       <AdditionalIncludeDirectories>wxWidgets_setup_h;wxWidgets\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DisableSpecificWarnings>4535</DisableSpecificWarnings>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
