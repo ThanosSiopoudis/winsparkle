@@ -1,7 +1,7 @@
 /*
  *  This file is part of WinSparkle (https://winsparkle.org)
  *
- *  Copyright (C) 2009-2016 Vaclav Slavik
+ *  Copyright (C) 2009-2017 Vaclav Slavik
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a
  *  copy of this software and associated documentation files (the "Software"),
@@ -47,22 +47,35 @@ namespace
 
 struct InetHandle
 {
-    InetHandle(HINTERNET handle) : m_handle(handle), m_callback(NULL) {}
+    InetHandle(HINTERNET handle = 0) : m_handle(handle), m_callback(NULL) {}
 
     ~InetHandle()
     {
-        if (m_handle)
-        {
-            if (m_callback)
-                InternetSetStatusCallback(m_handle, NULL);
-            InternetCloseHandle(m_handle);
-        }
+        Close();
+    }
+
+    InetHandle& operator=(HINTERNET handle)
+    {
+        Close();
+        m_handle = handle;
+        return *this;
     }
 
     void SetStatusCallback(INTERNET_STATUS_CALLBACK callback)
     {
         m_callback = callback;
         InternetSetStatusCallback(m_handle, m_callback);
+    }
+
+    void Close()
+    {
+        if (m_handle)
+        {
+            if (m_callback)
+                InternetSetStatusCallback(m_handle, NULL);
+            InternetCloseHandle(m_handle);
+            m_handle = NULL;
+        }
     }
 
     operator HINTERNET() const { return m_handle; }
@@ -126,6 +139,7 @@ std::wstring GetURLFileName(const char *url)
 
 struct DownloadCallbackContext
 {
+    DownloadCallbackContext(InetHandle *conn_) : conn(conn_) {}
     InetHandle *conn;
     Event eventRequestComplete;
 };
@@ -147,6 +161,10 @@ void CALLBACK DownloadInternetStatusCallback(_In_ HINTERNET hInternet,
 
         case INTERNET_STATUS_REQUEST_COMPLETE:
             context->eventRequestComplete.Signal();
+            break;
+
+        case INTERNET_STATUS_CONNECTION_CLOSED:
+            context->conn->Close();
             break;
     }
 }
@@ -191,7 +209,6 @@ void DownloadFile(const std::string& url, IDownloadSink *sink, Thread *onThread,
                       );
     if ( !inet )
         throw Win32Exception();
-    inet.SetStatusCallback(&DownloadInternetStatusCallback);
 
     DWORD dwFlags = 0;
     if ( flags & Download_NoCached )
@@ -199,18 +216,28 @@ void DownloadFile(const std::string& url, IDownloadSink *sink, Thread *onThread,
     if ( urlc.nScheme == INTERNET_SCHEME_HTTPS )
         dwFlags |= INTERNET_FLAG_SECURE;
 
-    DownloadCallbackContext context = { 0 };
-    InetHandle conn = InternetOpenUrlA
-                      (
-                          inet,
-                          url.c_str(),
-                          NULL, // lpszHeaders
-                          -1,   // dwHeadersLength
-                          dwFlags,
-                          (DWORD_PTR)&context  // dwContext
-                      );
-    context.conn = &conn;
-    if (!conn)
+    InetHandle conn;
+
+    DownloadCallbackContext context(&conn);
+    inet.SetStatusCallback(&DownloadInternetStatusCallback);
+
+    HINTERNET conn_raw = InternetOpenUrlA
+                         (
+                             inet,
+                             url.c_str(),
+                             NULL, // lpszHeaders
+                             -1,   // dwHeadersLength
+                             dwFlags,
+                             (DWORD_PTR)&context  // dwContext
+                         );
+    // InternetOpenUrl() may return NULL handle and then fill it in asynchronously from 
+    // DownloadInternetStatusCallback. We must make sure we don't overwrite the handle
+    // in that case, or throw an error.
+    if (conn_raw)
+    {
+        conn = conn_raw;
+    }
+    else
     {
         if (GetLastError() != ERROR_IO_PENDING)
             throw Win32Exception();
@@ -303,7 +330,14 @@ void DownloadFile(const std::string& url, IDownloadSink *sink, Thread *onThread,
         }
 
         if (ibuf.dwBufferLength == 0)
-            break; // all of the file was downloaded
+        {
+            // This check is required in case the INTERNET_STATUS_CONNECTION_CLOSED event was 
+            // received (and the handle was closed) during the call to InternetReadFileEx()
+            if (!conn)
+                throw Win32Exception();
+            else
+                break; // all of the file was downloaded
+        }
 
         sink->Add(ibuf.lpvBuffer, ibuf.dwBufferLength);
     }
