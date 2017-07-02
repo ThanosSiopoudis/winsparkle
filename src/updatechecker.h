@@ -60,9 +60,6 @@ public:
     static int CompareVersions(const std::string& a, const std::string& b);
 
 protected:
-    /// Returns flags to be used when checking the appcast
-    virtual int GetAppcastDownloadFlags() const { return 0; }
-
     /// Should give version be ignored?
     virtual bool ShouldSkipUpdate(const Appcast& appcast) const;
 
@@ -71,6 +68,7 @@ protected:
 
 protected:
     virtual void Run();
+    virtual void PerformUpdateCheck();
     virtual bool IsJoinable() const { return false; }
 };
 
@@ -85,8 +83,8 @@ public:
     ManualUpdateChecker() : UpdateChecker() {}
 
 protected:
-    virtual int GetAppcastDownloadFlags() const;
     virtual bool ShouldSkipUpdate(const Appcast& appcast) const;
+    void Run();
 };
 
 
