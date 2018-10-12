@@ -1,7 +1,7 @@
 /*
  *  This file is part of WinSparkle (https://winsparkle.org)
  *
- *  Copyright (C) 2009-2017 Vaclav Slavik
+ *  Copyright (C) 2009-2018 Vaclav Slavik
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a
  *  copy of this software and associated documentation files (the "Software"),
@@ -75,7 +75,7 @@ WIN_SPARKLE_API void __cdecl win_sparkle_init()
         {
             if ( checkUpdates )
             {
-                UpdateChecker *check = new UpdateChecker();
+                UpdateChecker *check = new PeriodicUpdateChecker();
                 check->Start();
             }
         }
@@ -148,6 +148,17 @@ WIN_SPARKLE_API void __cdecl win_sparkle_set_appcast_url(const char *url)
         Settings::SetAppcastURL(url);
     }
     CATCH_ALL_EXCEPTIONS
+}
+
+WIN_SPARKLE_API int __cdecl win_sparkle_set_dsa_pub_pem(const char *dsa_pub_pem)
+{
+    try
+    {
+        Settings::SetDSAPubKeyPem(dsa_pub_pem);
+        return 1;
+    }
+    CATCH_ALL_EXCEPTIONS
+    return 0;
 }
 
 WIN_SPARKLE_API void __cdecl win_sparkle_set_app_details(const wchar_t *company_name,
@@ -342,7 +353,7 @@ WIN_SPARKLE_API void __cdecl win_sparkle_check_update_without_ui()
     {
         // Run the check in background. Only show UI if updates
         // are available.
-        UpdateChecker *check = new UpdateChecker();
+        UpdateChecker *check = new OneShotUpdateChecker();
         check->Start();
     }
     CATCH_ALL_EXCEPTIONS

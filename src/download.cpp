@@ -1,7 +1,7 @@
 /*
  *  This file is part of WinSparkle (https://winsparkle.org)
  *
- *  Copyright (C) 2009-2017 Vaclav Slavik
+ *  Copyright (C) 2009-2018 Vaclav Slavik
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a
  *  copy of this software and associated documentation files (the "Software"),
@@ -139,8 +139,9 @@ std::wstring GetURLFileName(const char *url)
 
 struct DownloadCallbackContext
 {
-    DownloadCallbackContext(InetHandle *conn_) : conn(conn_) {}
+    DownloadCallbackContext(InetHandle *conn_) : conn(conn_), lastError(ERROR_SUCCESS) {}
     InetHandle *conn;
+    DWORD lastError;
     Event eventRequestComplete;
 };
 
@@ -160,11 +161,8 @@ void CALLBACK DownloadInternetStatusCallback(_In_ HINTERNET hInternet,
             break;
 
         case INTERNET_STATUS_REQUEST_COMPLETE:
+            context->lastError = res->dwError;
             context->eventRequestComplete.Signal();
-            break;
-
-        case INTERNET_STATUS_CONNECTION_CLOSED:
-            context->conn->Close();
             break;
     }
 }
@@ -336,9 +334,7 @@ void DownloadFile(const std::string& url, IDownloadSink *sink, Thread *onThread,
 
         if (ibuf.dwBufferLength == 0)
         {
-            // This check is required in case the INTERNET_STATUS_CONNECTION_CLOSED event was 
-            // received (and the handle was closed) during the call to InternetReadFileEx()
-            if (!conn)
+            if (context.lastError != ERROR_SUCCESS)
                 throw Win32Exception();
             else
                 break; // all of the file was downloaded
