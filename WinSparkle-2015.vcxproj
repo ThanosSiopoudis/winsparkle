@@ -25,7 +25,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>WinSparkle</RootNamespace>
     <ProjectName>WinSparkle</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -116,7 +116,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;XML_STATIC;BUILDING_WIN_SPARKLE;WIN32;_DEBUG;WINSPARKLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
-      <AdditionalIncludeDirectories>3rdparty\expat\expat\lib;3rdparty\openssl-win32;3rdparty\wxWidgets_setup_h;3rdparty\wxWidgets\include;include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>3rdparty\expat\expat\lib;3rdparty\openssl-win32;3rdparty\wxWidgets_setup_h;3rdparty\wxWidgets\include;C:\Program Files %28x86%29\Windows Kits\10\bin\x64;C:\Program Files %28x86%29\Windows Kits\10\Include\10.0.14393.0\um;C:\Program Files %28x86%29\Windows Kits\10\Include\10.0.14393.0\ucrt;C:\Program Files %28x86%29\Windows Kits\10\Include\10.0.14393.0\shared;include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/Zc:threadSafeInit- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
