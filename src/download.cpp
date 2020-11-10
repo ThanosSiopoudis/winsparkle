@@ -135,6 +135,8 @@ std::wstring GetURLFileName(const char *url)
 {
     const char *lastSlash = strrchr(url, '/');
     std::string fn(lastSlash ? lastSlash + 1 : url);
+    // Make sure we remove shit after question marks in the URL
+    fn = fn.substr(0, fn.find("?", 0));
     
     std::size_t result = fn.find_last_of('.');
     std::string extension = fn.substr(result + 1);
